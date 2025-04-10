@@ -1,0 +1,239 @@
+﻿<Window x:Class="HttpMonitoringSystem.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:local="clr-namespace:HttpMonitoringSystem"
+        mc:Ignorable="d"
+        Title="Система мониторинга HTTP-запросов" Height="800" Width="1200">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10,5"/>
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="Margin" Value="5,5,5,0"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <TabControl Grid.Row="1">
+            <!-- Сервер -->
+            <TabItem Header="Сервер">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0" Content="Порт:"/>
+                        <TextBox Grid.Column="1" Width="100" Name="ServerPortTextBox" Text="8080"/>
+                        <Button Grid.Column="2" Name="StartServerButton" Content="Запустить сервер" Click="StartServerButton_Click"/>
+                        <Button Grid.Column="3" Name="StopServerButton" Content="Остановить сервер" Click="StopServerButton_Click" IsEnabled="False"/>
+                        <Button Grid.Column="5" Name="SaveLogsButton" Content="Сохранить логи" Click="SaveLogsButton_Click"/>
+                    </Grid>
+                    
+                    <TabControl Grid.Row="1">
+                        <TabItem Header="Логи">
+                            <TextBox Name="ServerLogsTextBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+                        
+                        <TabItem Header="Статистика">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Label Content="Всего запросов:"/>
+                                    <Label Name="TotalRequestsLabel" Content="0"/>
+                                    <Label Content="GET:"/>
+                                    <Label Name="GetRequestsLabel" Content="0"/>
+                                    <Label Content="POST:"/>
+                                    <Label Name="PostRequestsLabel" Content="0"/>
+                                    <Label Content="Среднее время обработки:"/>
+                                    <Label Name="AverageTimeLabel" Content="0 мс"/>
+                                    <Button Name="RefreshStatsButton" Content="Обновить" Click="RefreshStatsButton_Click"/>
+                                </StackPanel>
+                                
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <GroupBox Grid.Row="0" Header="Запросы по минутам">
+                                        <lvc:CartesianChart Name="MinuteChart" Series="{Binding MinuteSeries}">
+                                            <lvc:CartesianChart.AxisX>
+                                                <lvc:Axis Name="MinuteAxisX" Title="Время" Labels="{Binding MinuteLabels}"/>
+                                            </lvc:CartesianChart.AxisX>
+                                            <lvc:CartesianChart.AxisY>
+                                                <lvc:Axis Title="Количество запросов" MinValue="0"/>
+                                            </lvc:CartesianChart.AxisY>
+                                        </lvc:CartesianChart>
+                                    </GroupBox>
+                                    
+                                    <GroupBox Grid.Row="1" Header="Запросы по часам">
+                                        <lvc:CartesianChart Name="HourChart" Series="{Binding HourSeries}">
+                                            <lvc:CartesianChart.AxisX>
+                                                <lvc:Axis Name="HourAxisX" Title="Время" Labels="{Binding HourLabels}"/>
+                                            </lvc:CartesianChart.AxisX>
+                                            <lvc:CartesianChart.AxisY>
+                                                <lvc:Axis Title="Количество запросов" MinValue="0"/>
+                                            </lvc:CartesianChart.AxisY>
+                                        </lvc:CartesianChart>
+                                    </GroupBox>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+                        
+                        <TabItem Header="Все запросы">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Label Content="Фильтр:"/>
+                                    <ComboBox Name="MethodFilterComboBox" Width="100" SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все" IsSelected="True"/>
+                                        <ComboBoxItem Content="GET"/>
+                                        <ComboBoxItem Content="POST"/>
+                                    </ComboBox>
+                                    <Label Content="Статус:"/>
+                                    <ComboBox Name="StatusFilterComboBox" Width="100" SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все" IsSelected="True"/>
+                                        <ComboBoxItem Content="200"/>
+                                        <ComboBoxItem Content="404"/>
+                                        <ComboBoxItem Content="500"/>
+                                    </ComboBox>
+                                    <Label Content="Направление:"/>
+                                    <ComboBox Name="DirectionFilterComboBox" Width="120" SelectionChanged="FilterComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="Все" IsSelected="True"/>
+                                        <ComboBoxItem Content="Входящие"/>
+                                        <ComboBoxItem Content="Исходящие"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                
+                                <DataGrid Grid.Row="1" Name="RequestsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="RequestsDataGrid_SelectionChanged">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                                        <DataGridTextColumn Header="Время" Binding="{Binding Timestamp}" Width="Auto"/>
+                                        <DataGridTextColumn Header="Метод" Binding="{Binding Method}" Width="Auto"/>
+                                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" Width="*"/>
+                                        <DataGridTextColumn Header="Статус" Binding="{Binding StatusCode}" Width="Auto"/>
+                                        <DataGridTextColumn Header="Время обработки (мс)" Binding="{Binding ProcessingTime.TotalMilliseconds}" Width="Auto"/>
+                                        <DataGridTextColumn Header="Направление" Binding="{Binding IsIncoming, Converter={StaticResource BoolToDirectionConverter}}" Width="Auto"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </TabItem>
+                        
+                        <TabItem Header="Детали запроса">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Label Grid.Row="0" Content="Заголовки:"/>
+                                <TextBox Grid.Row="1" Name="SelectedRequestHeadersTextBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                                
+                                <Label Grid.Row="2" Content="Тело запроса / Ответ:"/>
+                                <TabControl Grid.Row="3">
+                                    <TabItem Header="Тело запроса">
+                                        <TextBox Name="SelectedRequestBodyTextBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                                    </TabItem>
+                                    <TabItem Header="Ответ">
+                                        <TextBox Name="SelectedRequestResponseTextBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                                    </TabItem>
+                                </TabControl>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+            
+            <!-- Клиент -->
+            <TabItem Header="Клиент">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0" Content="URL:"/>
+                        <TextBox Grid.Column="1" Name="ClientUrlTextBox" Text="https://jsonplaceholder.typicode.com/posts/1"/>
+                        <Label Grid.Column="2" Content="Метод:"/>
+                        <ComboBox Grid.Column="3" Name="ClientMethodComboBox" Width="100" SelectionChanged="ClientMethodComboBox_SelectionChanged">
+                            <ComboBoxItem Content="GET" IsSelected="True"/>
+                            <ComboBoxItem Content="POST"/>
+                        </ComboBox>
+                        <Button Grid.Column="4" Name="SendRequestButton" Content="Отправить запрос" Click="SendRequestButton_Click"/>
+                    </Grid>
+                    
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0" Content="Тело запроса (JSON):"/>
+                        <TextBox Grid.Column="1" Name="ClientRequestBodyTextBox" Height="100" 
+                                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" 
+                                 IsEnabled="{Binding ElementName=ClientMethodComboBox, Path=SelectedItem.Content, Converter={StaticResource MethodToEnableConverter}}"/>
+                    </Grid>
+                    
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Label Grid.Row="0" Content="Ответ:"/>
+                        <TextBox Grid.Row="1" Name="ClientResponseTextBox" IsReadOnly="True" 
+                                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

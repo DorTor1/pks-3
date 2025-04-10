@@ -1,0 +1,11 @@
+﻿<Application x:Class="HttpMonitoringSystem.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:HttpMonitoringSystem"
+             xmlns:converters="clr-namespace:HttpMonitoringSystem.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <converters:BoolToDirectionConverter x:Key="BoolToDirectionConverter"/>
+        <converters:MethodToEnableConverter x:Key="MethodToEnableConverter"/>
+    </Application.Resources>
+</Application>

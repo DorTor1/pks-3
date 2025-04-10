@@ -1,0 +1,14 @@
+[10.04.2025 13:35:22] Необработанное исключение в Task: Сообщение: A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Операция ввода/вывода была прервана из-за завершения потока команд или по запросу приложения.)
+
+Внутреннее исключение: Операция ввода/вывода была прервана из-за завершения потока команд или по запросу приложения.
+
+Стек вызовов:
+
+
+[10.04.2025 13:37:03] Необработанное исключение в Task: Сообщение: A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Операция ввода/вывода была прервана из-за завершения потока команд или по запросу приложения.)
+
+Внутреннее исключение: Операция ввода/вывода была прервана из-за завершения потока команд или по запросу приложения.
+
+Стек вызовов:
+
+
